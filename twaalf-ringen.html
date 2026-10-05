@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Twaalf Ringen – steen, papier, schaar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Barlow:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#120B4A; --sky:#8FD3FF; --grass:#7BC96F; --pad:#5FA552;
+  --box:#FFFFFF; --boxline:#2A2550; --ink:#1A1A2E; --ui:#F2F0FF;
+  --hp:#3BD16F; --hpmid:#F5C518; --hplow:#FF4D4D; --pink:#FF2E88; --gold:#F5C518;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){ --bg:#E8E4FF; --ui:#1A1150; }
+}
+:root[data-theme="light"]{ --bg:#E8E4FF; --ui:#1A1150; }
+*,*::before,*::after{box-sizing:inherit}
+html,body{margin:0;height:100%}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg);color:var(--ui);font-family:"Barlow",system-ui,sans-serif}
+.pixel{font-family:"Press Start 2P","Courier New",monospace}
+main{max-width:30rem;margin:0 auto;padding:1rem .75rem 1.5rem;display:flex;flex-direction:column;gap:.75rem}
+h1{margin:0;text-align:center;font-size:clamp(1.1rem,5vw,1.5rem);line-height:1.4;color:var(--gold);text-shadow:3px 3px 0 var(--pink)}
+.sub{text-align:center;margin:0;font-weight:700;font-size:.95rem;opacity:.85}
+
+/* start screen */
+.start{background:var(--box);color:var(--ink);border:4px solid var(--boxline);border-radius:10px;padding:1.2rem;display:flex;flex-direction:column;gap:.9rem}
+.start label{font-size:.7rem;line-height:1.6}
+.start input{font:inherit;font-size:1.1rem;font-weight:700;padding:.7rem;border:3px solid var(--boxline);border-radius:8px;width:100%}
+.start input:focus-visible{outline:3px solid var(--pink);outline-offset:2px}
+.rules{font-size:.95rem;line-height:1.5;margin:0}
+
+/* battle field */
+.field{position:relative;aspect-ratio:4/3;border:4px solid var(--boxline);border-radius:10px;overflow:hidden;
+  background:linear-gradient(var(--sky) 0 52%, var(--grass) 52% 100%)}
+.plat{position:absolute;border-radius:50%;background:var(--pad);box-shadow:inset 0 -6px 0 rgba(0,0,0,.15)}
+.plat.foe{width:42%;height:12%;right:6%;top:40%}
+.plat.me{width:48%;height:14%;left:4%;bottom:6%}
+.sprite{position:absolute;line-height:1;transition:transform .25s,opacity .4s}
+.sprite.foe{width:30%;aspect-ratio:12/11;right:12%;top:12%}
+.sprite.me{font-size:clamp(4rem,19vw,5.8rem);left:14%;bottom:12%;transform:scaleX(-1)}
+.sprite.hit{animation:blink .5s steps(2) 2}
+.sprite.lunge-me{transform:scaleX(-1) translate(-18%,-10%)}
+.sprite.lunge-foe{transform:translate(-18%,12%)}
+.sprite.faint{opacity:0;transform:translateY(40%)}
+@keyframes blink{50%{opacity:0}}
+.move{position:absolute;font-size:2.4rem;opacity:0;transition:all .45s ease-out;left:30%;top:58%}
+.move.go-up{opacity:1;left:62%;top:22%}
+.move.go-down{opacity:1;left:28%;top:62%}
+.card{position:absolute;background:var(--box);color:var(--ink);border:3px solid var(--boxline);border-radius:8px 8px 8px 0;padding:.4rem .55rem;width:48%;font-size:.55rem;line-height:1.5}
+.card.foe{left:4%;top:6%}
+.card.me{right:4%;bottom:34%;border-radius:8px 8px 0 8px}
+.card .top{display:flex;justify-content:space-between;gap:.3rem}
+.card .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hpwrap{display:flex;align-items:center;gap:.3rem;margin-top:.3rem}
+.hpwrap b{color:#E0A800;font-size:.5rem}
+.bar{flex:1;height:.5rem;background:#555;border-radius:4px;overflow:hidden;border:2px solid var(--boxline)}
+.bar i{display:block;height:100%;width:100%;background:var(--hp);transition:width .6s,background .6s}
+.money{margin-top:.25rem;text-align:right}
+
+/* text + menu */
+.panel{display:grid;grid-template-columns:1fr;gap:.5rem}
+.textbox{background:var(--box);color:var(--ink);border:4px solid var(--boxline);border-radius:10px;padding:.9rem;min-height:5.4rem;font-size:.7rem;line-height:1.8}
+.menu{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+button{font:inherit;cursor:pointer;color:var(--ink);background:var(--box);border:4px solid var(--boxline);border-radius:10px;padding:.8rem .5rem;font-size:.62rem;line-height:1.5;text-align:left}
+button .ico{font-size:1.2rem;margin-right:.35rem;vertical-align:-.2rem}
+button:hover:not(:disabled){border-color:var(--pink)}
+button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+button:disabled{opacity:.45;cursor:default}
+button.cta{background:var(--pink);color:#fff;text-align:center}
+.ladder{display:flex;gap:3px}
+.ladder span{flex:1;height:.55rem;border-radius:2px;background:rgba(127,127,127,.35)}
+.ladder span.done{background:var(--gold)}
+.ladder span.now{background:var(--pink)}
+.ladderlbl{display:flex;justify-content:space-between;font-size:.8rem;font-weight:700;opacity:.85}
+.hidden{display:none!important}
+@media (prefers-reduced-motion: reduce){.sprite,.move,.bar i{transition:none}.sprite.hit{animation:none}}
+</style>
+</head>
+<body>
+<main>
+  <noscript><div style="background:#FF2E88;color:#fff;padding:1rem;border-radius:10px;font-weight:700;text-align:center">Dit spel werkt niet in deze voorbeeldweergave. Open het bestand in Chrome, Safari of een andere browser om te spelen.</div></noscript>
+  <h1 class="pixel">Twaalf Ringen</h1>
+  <p class="sub">Versla mol Graaf Gravel 12 ringen lang en win €50.000</p>
+
+  <section class="start" id="start">
+    <label class="pixel" for="nameIn">Hoe heet je, uitdager?</label>
+    <input id="nameIn" maxlength="12" placeholder="Jouw naam" autocomplete="off">
+    <p class="rules">Elke ring is een gevecht. Winnen raakt Graaf Gravel, verliezen kost jou HP. Je hebt 2 levens voor het hele spel. Gelijkspel? Dan gaat het gevecht door. Na elke gewonnen ring mag je stoppen en je geld meenemen.</p>
+    <button class="cta pixel" id="startBtn">Betreed de arena</button>
+  </section>
+
+  <section id="game" class="hidden" style="display:flex;flex-direction:column;gap:.75rem">
+    <div class="field" id="field">
+      <div class="plat foe"></div><div class="plat me"></div>
+      <div class="sprite foe" id="foeSprite"><svg viewBox="0 0 120 110" width="100%" height="100%" aria-label="Graaf Gravel, de mol">
+  <ellipse cx="60" cy="72" rx="44" ry="34" fill="#4A3F55"/>
+  <ellipse cx="60" cy="82" rx="26" ry="18" fill="#6B5E78"/>
+  <path d="M18 80 l-12 6 M20 86 l-12 2 M22 92 l-10 -2" stroke="#F2C9C9" stroke-width="4" stroke-linecap="round"/>
+  <path d="M102 80 l12 6 M100 86 l12 2 M98 92 l10 -2" stroke="#F2C9C9" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="44" cy="58" r="4" fill="#111"/><circle cx="76" cy="58" r="4" fill="#111"/>
+  <circle cx="45" cy="57" r="1.3" fill="#fff"/><circle cx="77" cy="57" r="1.3" fill="#fff"/>
+  <ellipse cx="60" cy="70" rx="10" ry="7" fill="#FF8FB1"/>
+  <path d="M52 80 q8 6 16 0" stroke="#111" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M22 44 q38 -40 76 0 z" fill="#F5C518" stroke="#2A2550" stroke-width="3"/>
+  <rect x="18" y="42" width="84" height="7" rx="3" fill="#E0A800" stroke="#2A2550" stroke-width="3"/>
+  <circle cx="60" cy="28" r="7" fill="#FFF6C2" stroke="#2A2550" stroke-width="3"/>
+</svg></div>
+      <div class="sprite me" id="meSprite">🧑</div>
+      <div class="move" id="moveFx"></div>
+
+      <div class="card foe pixel">
+        <div class="top"><span class="name">GRAAF GRAVEL</span><span id="foeLv">Lv1</span></div>
+        <div class="hpwrap"><b>HP</b><div class="bar"><i id="foeHp"></i></div></div>
+      </div>
+      <div class="card me pixel">
+        <div class="top"><span class="name" id="meName">JIJ</span><span id="meLv">Lv1</span></div>
+        <div class="hpwrap"><b>HP</b><div class="bar"><i id="meHp"></i></div></div>
+        <div class="money" id="money">€0</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="ladderlbl"><span id="ringLbl">Ring 1 van 12</span><span id="nextLbl">Inzet: €100</span></div>
+      <div class="ladder" id="ladder"></div>
+    </div>
+
+    <div class="panel">
+      <div class="textbox pixel" id="text" aria-live="polite"></div>
+      <div class="menu" id="menu">
+        <button class="pixel" data-c="steen"><span class="ico">✊</span>STEEN</button>
+        <button class="pixel" data-c="papier"><span class="ico">✋</span>PAPIER</button>
+        <button class="pixel" data-c="schaar"><span class="ico">✌️</span>SCHAAR</button>
+        <button class="pixel" id="runBtn"><span class="ico">💰</span>STOP</button>
+      </div>
+      <button class="cta pixel hidden" id="againBtn">Opnieuw spelen</button>
+    </div>
+  </section>
+</main>
+
+<script>
+window.addEventListener("error",function(e){var t=document.getElementById("text");var st=document.getElementById("start");var m="Er ging iets mis: "+e.message;if(t)t.textContent=m;if(st&&!st.classList.contains("hidden")){st.insertAdjacentHTML("beforeend","<p style='color:#c00;font-weight:700'>"+m+"</p>")}});
+(function(){
+"use strict";
+
+const LADDER=[100,250,500,1000,2000,3500,5000,7500,10000,15000,25000,50000];
+const ICON={steen:"✊",papier:"✋",schaar:"✌️"};
+const MOVE={steen:"STEENSLAG",papier:"PAPIERWIND",schaar:"SCHAARSNEDE"};
+const BEATS={steen:"schaar",papier:"steen",schaar:"papier"};
+const OPTS=["steen","papier","schaar"];
+const TAUNT=["Ik graaf je zo onder!","Ik zie slecht, maar jou zie ik wel verliezen.","Deze arena is mijn gangenstelsel.","Ik ruik je twijfel…","Spannend hè? Voor jou dan."];
+const $=id=>document.getElementById(id);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const euro=n=>"€"+n.toLocaleString("nl-NL");
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+let playerName="JIJ", ring=0, lives=2, bank=0, busy=false, done=false;
+
+function setBar(el,frac){
+  el.style.width=(frac*100)+"%";
+  el.style.background= frac>.5?"var(--hp)":frac>.2?"var(--hpmid)":"var(--hplow)";
+}
+function say(t){$("text").innerHTML=t}
+function menuOn(on){document.querySelectorAll("#menu button").forEach(b=>b.disabled=!on);$("runBtn").disabled=!on||ring===0}
+function render(){
+  $("meName").textContent=playerName.toUpperCase();
+  $("foeLv").textContent="Lv"+Math.min(ring+1,12);
+  $("meLv").textContent="Lv"+(ring+1);
+  $("money").textContent=euro(bank);
+  setBar($("meHp"),lives/2);
+  $("ringLbl").textContent= ring<12?`Ring ${ring+1} van 12`:"Kampioen!";
+  $("nextLbl").textContent= ring<12?"Inzet: "+euro(LADDER[ring]):"€50.000";
+  $("ladder").innerHTML=LADDER.map((_,i)=>`<span class="${i<ring?"done":i===ring&&!done?"now":""}"></span>`).join("");
+}
+function askMove(){say(`Wat doet ${playerName.toUpperCase()}?`);menuOn(true)}
+
+function startGame(){
+  playerName=($("nameIn").value.trim()||"Uitdager").slice(0,12);
+  $("start").classList.add("hidden");$("game").classList.remove("hidden");
+  reset();
+}
+async function reset(){
+  ring=0;lives=2;bank=0;busy=false;done=false;
+  $("againBtn").classList.add("hidden");$("menu").classList.remove("hidden");
+  $("foeSprite").className="sprite foe";$("meSprite").className="sprite me";
+  setBar($("foeHp"),1);render();menuOn(false);
+  say("Een wilde mol graaft zich omhoog… GRAAF GRAVEL daagt je uit!");await wait(1300);
+  say(`Ga ervoor, ${playerName.toUpperCase()}!`);await wait(1000);
+  askMove();
+}
+
+async function fx(icon,dir){
+  const m=$("moveFx");m.className="move";m.textContent=icon;
+  m.style.left=dir==="up"?"30%":"62%";m.style.top=dir==="up"?"58%":"22%";
+  void m.offsetWidth;m.classList.add(dir==="up"?"go-up":"go-down");
+  m.style.left="";m.style.top="";
+  await wait(500);m.className="move";
+}
+
+async function turn(c){
+  if(busy||done)return;busy=true;menuOn(false);
+  const foe=pick(OPTS);
+  say(`${playerName.toUpperCase()} gebruikt ${MOVE[c]}!`);
+  $("meSprite").classList.add("lunge-me");await wait(250);$("meSprite").classList.remove("lunge-me");
+  await fx(ICON[c],"up");
+  say(`GRAAF GRAVEL gebruikt ${MOVE[foe]}!`);
+  $("foeSprite").classList.add("lunge-foe");await wait(250);$("foeSprite").classList.remove("lunge-foe");
+  await fx(ICON[foe],"down");
+
+  if(c===foe){
+    say("De aanvallen botsen! Er gebeurt niets…");await wait(1300);
+    say("GRAAF GRAVEL: \""+pick(TAUNT)+"\"");await wait(1500);
+  }else if(BEATS[c]===foe){
+    say("Het is super effectief!");
+    $("foeSprite").classList.add("hit");setBar($("foeHp"),0);await wait(1100);
+    $("foeSprite").classList.remove("hit");
+    bank=LADDER[ring];ring++;render();
+    if(ring===12){
+      $("foeSprite").classList.add("faint");
+      say(`GRAAF GRAVEL is verslagen! ${playerName.toUpperCase()} overleeft alle 12 ringen en wint €50.000! 🏆`);
+      return finish();
+    }
+    say(`Ring gewonnen! ${playerName.toUpperCase()} heeft nu ${euro(bank)}.`);await wait(1600);
+    say(`GRAAF GRAVEL graaft zich weer op voor ring ${ring+1}!`);setBar($("foeHp"),1);await wait(1200);
+  }else{
+    say(`Au! ${playerName.toUpperCase()} wordt geraakt!`);
+    $("meSprite").classList.add("hit");lives--;render();await wait(1100);
+    $("meSprite").classList.remove("hit");
+    if(lives===0){
+      $("meSprite").classList.add("faint");
+      say(`${playerName.toUpperCase()} is uitgeschakeld in ring ${ring+1}… en gaat met lege handen naar huis.`);
+      bank=0;render();return finish();
+    }
+    say("Nog één leven over! Je blijft in deze ring.");await wait(1500);
+  }
+  busy=false;askMove();
+}
+function finish(){done=true;busy=false;render();$("menu").classList.add("hidden");$("againBtn").classList.remove("hidden")}
+
+document.querySelectorAll("#menu [data-c]").forEach(b=>b.addEventListener("click",()=>turn(b.dataset.c)));
+$("runBtn").addEventListener("click",()=>{if(busy||done)return;say(`${playerName.toUpperCase()} stopt veilig en neemt ${euro(bank)} mee naar huis!`);finish()});
+$("startBtn").addEventListener("click",startGame);
+$("nameIn").addEventListener("keydown",e=>{if(e.key==="Enter")startGame()});
+$("againBtn").addEventListener("click",reset);
+
+})();
+</script>
+</body>
+</html>
